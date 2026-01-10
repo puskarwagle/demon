@@ -1,0 +1,74 @@
+/* Chat Widget Styles */
+.chat-fab svg {
+  width: 24px;
+  height: 24px;
+}
+
+.chat-panel {
+  animation: slideIn 0.2s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.messages-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.messages-container::-webkit-scrollbar-track {
+  background: #18181b;
+}
+
+.messages-container::-webkit-scrollbar-thumb {
+  background: #3f3f46;
+  border-radius: 4px;
+}
+
+.messages-container::-webkit-scrollbar-thumb:hover {
+  background: #52525b;
+}
+
+.chat-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.chat-form button[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.loading-dots {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.loading-dots::after {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: dots 1.4s infinite;
+}
+
+@keyframes dots {
+  0%, 20% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.2;
+  }
+}
