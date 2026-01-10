@@ -16,6 +16,6 @@
     src="/templates/ecommerce/index.html"
     title="E-commerce Template"
     class="flex-1 w-full border-0"
-  />
+  ></iframe>
 </div>
 <ChatWidget />

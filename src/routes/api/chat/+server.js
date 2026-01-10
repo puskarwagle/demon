@@ -20,7 +20,7 @@ function findAider() {
 }
 
 // Execute aider command and return response
-async function sendToAider(message, timeout = 120000, template = null) {
+async function sendToAider(message, timeout = 120000, template = null, file = null) {
   return new Promise((resolve, reject) => {
     const aiderPath = findAider();
 
@@ -42,6 +42,11 @@ async function sendToAider(message, timeout = 120000, template = null) {
       '--no-show-model-warnings',
       '--subtree-only'  // Only scan current directory, not entire repo
     ];
+
+    // Add file if provided from inspector
+    if (file) {
+      args.push('--file', file);
+    }
 
     // Add DeepSeek configuration if API key is available
     if (process.env.DEEPSEEK_API_KEY) {
@@ -103,14 +108,14 @@ async function sendToAider(message, timeout = 120000, template = null) {
 
 export async function POST({ request }) {
   try {
-    const { message, template } = await request.json();
+    const { message, template, file } = await request.json();
 
     if (!message) {
       return json({ error: 'Message is required' }, { status: 400 });
     }
 
-    // Send message to aider with template context
-    const response = await sendToAider(message, 120000, template);
+    // Send message to aider with template context and file from inspector
+    const response = await sendToAider(message, 120000, template, file);
 
     return json({
       success: true,

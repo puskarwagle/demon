@@ -30,14 +30,13 @@ console.log('✅ Inspector script loaded from static/inspector.js');
 
       // UI elements
       this.container = null;
-      this.toggleBtn = null;
       this.contentPanel = null;
 
       // Bind methods
       this.handleMouseOver = this.handleMouseOver.bind(this);
       this.handleClick = this.handleClick.bind(this);
       this.toggle = this.toggle.bind(this);
-      this.copyToClipboard = this.copyToClipboard.bind(this);
+      this.insertToChat = this.insertToChat.bind(this);
       this.handleKeyPress = this.handleKeyPress.bind(this);
 
       // Initialize
@@ -97,10 +96,10 @@ console.log('✅ Inspector script loaded from static/inspector.js');
 .ei-icon-active { color: #10b981; }
 .ei-icon-inactive { color: #9ca3af; }
 .ei-tag-name { font-weight: 700; color: #60a5fa; font-size: 1.125rem; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
-.ei-copy-btn { display: flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; background-color: #1f2937; color: #9ca3af; border: none; border-radius: 0.5rem; cursor: pointer; transition: background-color 0.2s; flex-shrink: 0; }
-.ei-copy-btn:hover { background-color: #374151; color: white; }
-.ei-copy-btn.ei-copy-success { background-color: #065f46; color: #10b981; animation: ei-copy-pulse 0.3s ease-out; }
-@keyframes ei-copy-pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+.ei-insert-btn { display: flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; background-color: #1f2937; color: #9ca3af; border: none; border-radius: 0.5rem; cursor: pointer; transition: background-color 0.2s; flex-shrink: 0; }
+.ei-insert-btn:hover { background-color: #374151; color: white; }
+.ei-insert-btn.ei-copy-success { background-color: #065f46; color: #10b981; animation: ei-insert-pulse 0.3s ease-out; }
+@keyframes ei-insert-pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
 .ei-content { display: flex; flex-direction: column; gap: 1.25rem; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 0.875rem; animation: ei-fade-in 0.2s ease-out; }
 .ei-section { display: flex; flex-direction: column; gap: 0.75rem; }
 .ei-section-title { color: #9ca3af; font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; border-bottom: 1px solid #374151; padding-bottom: 0.375rem; }
@@ -148,23 +147,14 @@ console.log('✅ Inspector script loaded from static/inspector.js');
         <div class="ei-header">
           <div class="ei-header-left" style="display: none;">
             <span class="ei-tag-name"></span>
-            <button class="ei-copy-btn" title="Copy info to clipboard">
+            <button class="ei-insert-btn" title="Insert into chat">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
               </svg>
             </button>
           </div>
-          <button class="ei-toggle-btn" title="Toggle Inspector (Alt+I)">
-            <svg class="ei-icon-active" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-              <circle cx="12" cy="12" r="3"></circle>
-            </svg>
-            <svg class="ei-icon-inactive" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-              <line x1="1" y1="1" x2="23" y2="23"></line>
-            </svg>
-          </button>
         </div>
         <div class="ei-content" style="display: none;"></div>
       `;
@@ -172,24 +162,24 @@ console.log('✅ Inspector script loaded from static/inspector.js');
       document.body.appendChild(this.container);
 
       // Store references
-      this.toggleBtn = this.container.querySelector('.ei-toggle-btn');
       this.contentPanel = this.container.querySelector('.ei-content');
       this.headerLeft = this.container.querySelector('.ei-header-left');
-      this.copyBtn = this.container.querySelector('.ei-copy-btn');
+      this.insertBtn = this.container.querySelector('.ei-insert-btn');
     }
 
     /**
      * Attach event listeners
      */
     attachEventListeners() {
-      this.toggleBtn.addEventListener('click', this.toggle);
-      this.copyBtn.addEventListener('click', this.copyToClipboard);
+      this.insertBtn.addEventListener('click', this.insertToChat);
       document.addEventListener('keydown', this.handleKeyPress);
 
       // Listen for messages from parent window
       window.addEventListener('message', (event) => {
         if (event.data && event.data.type === 'inspector-toggle') {
+          console.log('Inspector received toggle message, current active:', this.active);
           this.toggle();
+          console.log('Inspector toggled, new active:', this.active);
         }
       });
     }
@@ -287,27 +277,25 @@ console.log('✅ Inspector script loaded from static/inspector.js');
      * Update UI to reflect current state
      */
     updateUI() {
-      const iconActive = this.container.querySelector('.ei-icon-active');
-      const iconInactive = this.container.querySelector('.ei-icon-inactive');
-
-      if (this.active) {
-        this.toggleBtn.classList.add('active');
-        iconActive.style.display = 'block';
-        iconInactive.style.display = 'none';
-      } else {
-        this.toggleBtn.classList.remove('active');
-        iconActive.style.display = 'none';
-        iconInactive.style.display = 'block';
-      }
-
-      // Show/hide content panel
+      // Show/hide content panel based on active state and locked element
       const hasInfo = this.active && this.info;
-      this.container.classList.toggle('ei-expanded', hasInfo);
-      this.contentPanel.style.display = hasInfo ? 'block' : 'none';
-      this.headerLeft.style.display = hasInfo ? 'flex' : 'none';
 
       if (hasInfo) {
+        this.container.style.display = 'flex';
+        this.container.classList.add('ei-expanded');
+        this.contentPanel.style.display = 'block';
+        this.headerLeft.style.display = 'flex';
         this.renderInfo();
+      } else {
+        // Hide entire container when inspector is inactive or no element is locked
+        if (!this.active) {
+          this.container.style.display = 'none';
+        } else {
+          this.container.style.display = 'flex';
+          this.container.classList.remove('ei-expanded');
+          this.contentPanel.style.display = 'none';
+          this.headerLeft.style.display = 'none';
+        }
       }
     }
 
@@ -718,76 +706,69 @@ console.log('✅ Inspector script loaded from static/inspector.js');
     }
 
     /**
-     * Copy element info to clipboard (Aider-ready format)
+     * Insert element info into chat input
      */
-    copyToClipboard() {
+    insertToChat() {
       if (!this.info) return;
 
-      const { tag, sourceFile, sourceLine, id, classes, selectorPath, hierarchy, textContent, attributes } = this.info;
+      const { tag, sourceFile, sourceLine, id, classes, selectorPath, hierarchy, textContent } = this.info;
 
-      // Format for Aider
-      let text = `/add ${sourceFile}\n\n`;
-
-      // Build element description
-      text += `Edit line ${sourceLine} - the <${tag}>`;
+      // Build element description for chat
+      let description = `[File: ${sourceFile}:${sourceLine}] Edit the <${tag}>`;
 
       if (classes) {
-        text += ` with class "${classes}"`;
+        description += ` with class "${classes}"`;
       } else if (id) {
-        text += ` with id "${id}"`;
+        description += ` with id "${id}"`;
       }
 
       if (textContent) {
-        text += ` that contains:\n"${textContent}"\n`;
-      } else {
-        text += '\n';
+        description += ` that contains "${textContent}"`;
       }
 
-      text += '\n';
+      description += ' - ';
 
-      // Add selector for precision
-      text += `Selector: ${selectorPath}\n`;
+      // Send to parent window (ChatWidget)
+      window.parent.postMessage({
+        type: 'inspector-insert',
+        data: {
+          file: sourceFile,
+          line: sourceLine,
+          description: description,
+          tag: tag,
+          classes: classes,
+          id: id,
+          selector: selectorPath,
+          hierarchy: hierarchy,
+          textContent: textContent
+        }
+      }, '*');
 
-      // Add parent context if available
-      if (hierarchy.length > 0) {
-        text += `Parent: <${hierarchy[0]}>\n`;
-      }
-
-      // Add important attributes if any
-      if (Object.keys(attributes).length > 0) {
-        text += `Attributes: ${Object.entries(attributes).map(([k, v]) => `${k}="${v}"`).join(', ')}\n`;
-      }
-
-      navigator.clipboard.writeText(text).then(() => {
-        this.showCopyFeedback();
-      }).catch(err => {
-        console.error('Failed to copy:', err);
-        this.showToast('Failed to copy', true);
-      });
+      this.showInsertFeedback();
     }
 
     /**
-     * Show copy button feedback
+     * Show insert button feedback
      */
-    showCopyFeedback() {
-      const copyBtn = this.copyBtn;
-      const originalHTML = copyBtn.innerHTML;
+    showInsertFeedback() {
+      const insertBtn = this.insertBtn;
+      const originalHTML = insertBtn.innerHTML;
 
       // Change to checkmark
-      copyBtn.innerHTML = `
+      insertBtn.innerHTML = `
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="20 6 9 17 4 12"></polyline>
         </svg>
       `;
-      copyBtn.classList.add('ei-copy-success');
+      insertBtn.classList.add('ei-copy-success');
 
       // Show toast
-      this.showToast('Copied to clipboard!');
+      this.showToast('Inserted into chat!');
 
       // Restore original icon after 2 seconds
       setTimeout(() => {
-        copyBtn.innerHTML = originalHTML;
-        copyBtn.classList.remove('ei-copy-success');
+        insertBtn.innerHTML = originalHTML;
+        insertBtn.classList.remove('ei-copy-success');
       }, 2000);
     }
 

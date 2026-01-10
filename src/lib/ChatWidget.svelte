@@ -29,7 +29,10 @@
     }
   }
 
-  // Listen for inspector state changes from iframe
+  // Store inspector file context
+  let inspectorFile = $state(null);
+
+  // Listen for inspector state changes and insertions from iframe
   if (typeof window !== 'undefined') {
     window.addEventListener('message', (event) => {
       // Only handle inspector messages
@@ -39,6 +42,17 @@
           inspectorActive = event.data.active;
         } else if (event.data.type === 'inspector-ready') {
           console.log('Inspector ready in iframe');
+        } else if (event.data.type === 'inspector-insert') {
+          console.log('Received inspector-insert:', event.data.data);
+          // Store file context for Aider
+          inspectorFile = event.data.data.file;
+          // Populate input with description
+          inputValue = event.data.data.description;
+          // Focus input so user can continue typing
+          setTimeout(() => {
+            const input = document.querySelector('.chat-input');
+            if (input) input.focus();
+          }, 100);
         }
       }
     });
@@ -48,7 +62,11 @@
     if (!inputValue.trim() || isLoading) return;
 
     const userMessage = inputValue.trim();
+    const fileToEdit = inspectorFile;
+
+    // Clear input and inspector context
     inputValue = '';
+    inspectorFile = null;
 
     // Add user message
     messages = [...messages, {
@@ -69,7 +87,8 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: userMessage,
-          template: templateName
+          template: templateName,
+          file: fileToEdit  // Send file context from inspector
         })
       });
 
@@ -91,7 +110,7 @@
     } catch (error) {
       messages = [...messages, {
         role: 'assistant',
-        content: `Failed to send message: ${error.message}`,
+          content: `Failed to send message: ${error.message}`,
         timestamp: new Date().toISOString()
       }];
     } finally {
@@ -176,7 +195,7 @@
           placeholder="Type a command..."
           bind:value={inputValue}
           disabled={isLoading}
-          class="input input-bordered w-full focus:outline-none border-zinc-700 bg-black text-white transition-colors"
+          class="chat-input input input-bordered w-full focus:outline-none border-zinc-700 bg-black text-white transition-colors"
         />
         <button
           type="submit"

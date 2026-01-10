@@ -16,6 +16,6 @@
     src="/templates/botcloud/index.html"
     title="BotCloud Template"
     class="flex-1 w-full border-0"
-  />
+  ></iframe>
 </div>
 <ChatWidget />
