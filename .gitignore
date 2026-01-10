@@ -26,3 +26,4 @@ vite.config.ts.timestamp-*
 # Templates (separate git repos)
 /templates/botcloud
 /templates/ecommerce
+node_modules/
